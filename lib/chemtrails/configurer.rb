@@ -14,25 +14,26 @@ module Chemtrails
       profiles = env.fetch('CONFIG_SERVER_PROFILE_ACTIVE', rails_env)
 
       if use_p_config_server_service == 'true'
-        vcap_services = env.fetch('VCAP_SERVICES') {fail('USE_P_CONFIG_SERVER_SERVICE=true but no VCAP_SERVICES variable is present. Are you running on a CF?')}
-        config_server_services_json = JSON.parse(vcap_services).fetch('p-config-server') {fail('USE_P_CONFIG_SERVER_SERVICE=true but no p-config-server in VCAP_SERVICES. Have you bound the service?')}
+        vcap_services = env.fetch('VCAP_SERVICES') { raise('USE_P_CONFIG_SERVER_SERVICE=true but no VCAP_SERVICES variable is present. Are you running on a CF?') }
+        config_server_services_json = JSON.parse(vcap_services).fetch('p-config-server') { raise('USE_P_CONFIG_SERVER_SERVICE=true but no p-config-server in VCAP_SERVICES. Have you bound the service?') }
         config_server_service_json = config_server_services_json.first
 
         env_vars_from_config_server = @oauth_configuration_fetcher.fetch_configuration(
-            app_name: app_name,
-            branch: branch,
-            profiles: profiles,
-            config_server_url: config_server_service_json.fetch('credentials').fetch('uri'),
-            access_token_url: config_server_service_json.fetch('credentials').fetch('access_token_uri'),
-            client_id: config_server_service_json.fetch('credentials').fetch('client_id'),
-            client_secret: config_server_service_json.fetch('credentials').fetch('client_secret'),
+          app_name: app_name,
+          branch: branch,
+          profiles: profiles,
+          config_server_url: config_server_service_json.fetch('credentials').fetch('uri'),
+          access_token_url: config_server_service_json.fetch('credentials').fetch('access_token_uri'),
+          client_id: config_server_service_json.fetch('credentials').fetch('client_id'),
+          client_secret: config_server_service_json.fetch('credentials').fetch('client_secret')
         )
         env.update(env_vars_from_config_server)
       elsif server.present?
         env_vars_from_config_server = @basic_auth_configuration_fetcher.fetch_configuration(server, app_name, profiles, branch, username, password)
+        env_vars_from_config_server.update(env_vars_from_config_server) { |key, value| key.to_s; value.to_s }
         env.update(env_vars_from_config_server)
       else
-        puts "No CONFIG_SERVER_URL provided, Chemtrails will not fetch environment variables"
+        puts 'No CONFIG_SERVER_URL provided, Chemtrails will not fetch environment variables'
       end
     end
   end
