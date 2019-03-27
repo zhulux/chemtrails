@@ -17,7 +17,7 @@ describe Chemtrails::Railtie do
 
         before_configuration_hook_proc.call
 
-        expect(Chemtrails::Railtie).to_not have_received(:startup)
+        expect(Chemtrails::Railtie).to have_received(:startup)
       end
     end
 

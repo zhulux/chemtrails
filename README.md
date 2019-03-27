@@ -4,7 +4,11 @@
 [![Code Climate](https://codeclimate.com/github/pivotal/chemtrails/badges/gpa.svg)](https://codeclimate.com/github/pivotal/chemtrails)
 [![Test Coverage](https://codeclimate.com/github/pivotal/chemtrails/badges/coverage.svg)](https://codeclimate.com/github/pivotal/chemtrails/coverage)
 
-This gem allows you to fetch the configuration for your rails app from a [Spring Cloud Config](http://cloud.spring.io/spring-cloud-config) server. 
+This gem allows you to fetch the configuration for your rails app from a [Spring Cloud Config](http://cloud.spring.io/spring-cloud-config) server.
+
+## Note
+
+If it does not working in development, please try `spring stop`.
 
 ## Installation
 
@@ -27,11 +31,11 @@ To use your own config server, set the location and of your config server and an
     CONFIG_SERVER_URL=http://localhost:8080
     CONFIG_SERVER_USERNAME=username
     CONFIG_SERVER_PASSWORD=password
-    
+
 To use a Config Server service on PWS, set:
 
     USE_P_CONFIG_SERVER_SERVICE=true
-    
+
 The rest of the configuration is the same regardless of what type of server you are using.
 
 If you want to request values that are not on the `master` branch, you can optionally supply the branch name:
@@ -43,16 +47,20 @@ If this is not provided, Spring Cloud Config will return values from the `master
 You will also need to set your Rails environment so that Chemtrails knows which profile to fetch properties for.
 
     RAILS_ENV={env}
-    
+
 If you'd like to fetch properties from a different profile (or multiple profiles) use `CONFIG_SERVER_PROFILE_ACTIVE` to override. e.g.
 
     CONFIG_SERVER_PROFILE_ACTIVE=staging,web,noclip,muted
-    
+
 When your Rails app boots, it will fetch the configuration for the given environment from the config server and populate
 the ENV with the values it finds. It will use the application name and environment name to determine which set of values
 to fetch. For example, if the application is named `Sandwich` and is running in the `production` environment, it will fetch
 the configuration from the endpoint `$CONFIG_SERVER_URL/sandwich/production`. With Spring Cloud Config, this corresponds
 to a property source named `sandwich-production.properties`.
+
+## Refresh
+
+If you want refresh like `spring cloud config client`, just call `Chemtrails::Railtie.startup(Rails.application.class.parent.to_s.downcase, Rails.env, ENV)`.
 
 ## Disabling
 
@@ -63,7 +71,7 @@ Increase the version number in `lib/chemtrails/version.rb`
 
     gem build chemtrails.gemspec
     gem push chemtrails-$VERSION.gem
-    
+
 Credentials are in lastpass
 
 ## License
